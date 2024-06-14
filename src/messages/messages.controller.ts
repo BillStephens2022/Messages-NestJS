@@ -1,15 +1,19 @@
-import { Controller, Get, Post, Body, Param, NotFoundException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Body,
+  Param,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateMessageDto } from './dtos/create-message.dto';
 import { MessagesService } from './messages.service';
 
 @Controller('messages')
 export class MessagesController {
-  messagesService: MessagesService;
-  // Controller is creating its own dependencies. MessagesRepository is a dependency of MessagesService
-  // DON'T DO THIS ON REAL APPS (Use dependency injection)
-  constructor() {
-    this.messagesService = new MessagesService();
-  }
+  // Dependency Injection - creation of this controller depends on creation of the MessagesService
+  constructor(public messagesService: MessagesService) {}
 
   @Get()
   listMessages() {
@@ -26,9 +30,20 @@ export class MessagesController {
   async getMessage(@Param('id') id: string) {
     const message = await this.messagesService.findOne(id);
     if (!message) {
-      throw new NotFoundException('message not found! try sending request with a valid id.');
+      throw new NotFoundException(
+        'message not found! try sending request with a valid id.',
+      );
     }
+  }
 
+  @Delete('/:id')
+  async deleteMessage(@Param('id') id: string) {
+    const message = await this.messagesService.deleteOne(id);
+    if (!message) {
+      throw new NotFoundException(
+        'message not found! try sending request with a valid id.',
+      );
+    }
     return message;
   }
 }
